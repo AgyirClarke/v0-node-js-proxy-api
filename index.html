@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Staff Login Form with Microsoft Form</title>
+  <link href="https://unpkg.com/tailwindcss@3.3.2/dist/tailwind.min.css" rel="stylesheet" />
+  <style>
+    body { background-color: #f9fafb; }
+    .container { max-width: 450px; margin: 40px auto; padding: 20px; background-color: #ffffff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    .error { color: #dc2626; font-size: 0.875rem; margin-top: 4px; }
+    .info { margin-top: 2rem; font-size: 0.875rem; color: #444444; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 class="text-2xl font-semibold mb-4">Staff Login Form</h2>
+    <form id="staffForm" onsubmit="submitForm(event)">
+      <label>Name</label>
+      <input type="text" id="name" class="w-full p-2 mb-4 border rounded" placeholder="Enter your name" required />
+
+      <label>eMail</label>
+      <input type="email" id="email" class="w-full p-2 mb-4 border rounded" placeholder="Enter your email" required />
+
+      <label>Staff ID</label>
+      <input type="text" id="staffID" class="w-full p-2 mb-4 border rounded" placeholder="Enter your staff ID" required />
+
+      <label>Unit</label>
+      <select id="unit" class="w-full p-2 mb-2 border rounded" onchange="toggleOtherUnit(this.value)" required>
+        <option value="">Select Unit</option>
+        <option value="INBOUND">INBOUND</option>
+        <option value="OUTBOUND">OUTBOUND</option>
+        <option value="SERVICE EXCELLENCE">SERVICE EXCELLENCE</option>
+        <option value="SOCIAL MEDIA">SOCIAL MEDIA</option>
+        <option value="DIGITAL SUPPORT">DIGITAL SUPPORT</option>
+        <option value="OTHER">Other</option>
+      </select>
+      <input type="text" id="otherUnit" class="w-full p-2 mb-4 border rounded hidden" placeholder="Please specify other unit" />
+
+      <label>Shift</label>
+      <select id="shift" class="w-full p-2 mb-4 border rounded" required>
+        <option value="">Select Shift</option>
+        <option value="MORNING">MORNING</option>
+        <option value="REGULAR">REGULAR</option>
+        <option value="AFTERNOON">AFTERNOON</option>
+        <option value="NIGHT">NIGHT</option>
+      </select>
+
+      <label>Sign Type</label>
+      <select id="signType" class="w-full p-2 mb-4 border rounded" required>
+        <option value="">Select Sign Type</option>
+        <option value="SIGN IN">Sign in</option>
+        <option value="SIGN OUT">Sign out</option>
+      </select>
+
+      <input type="hidden" id="latitude" />
+      <input type="hidden" id="longitude" />
+
+      <button type="submit" class="w-full p-2 bg-blue-600 text-white rounded">Submit and Continue</button>
+      <p id="errorMessage" class="error"></p>
+    </form>
+    <div class="info">
+      After submitting this form, you will be redirected to fill the Microsoft Form.
+    </div>
+  </div>
+
+  <script>
+    const microsoftFormURL = "https://forms.office.com/Pages/ResponsePage.aspx?id=EXAMPLE_FORM_ID"; 
+    // Replace above URL with your real Microsoft Form link
+
+    function toggleOtherUnit(value) {
+      const otherUnitInput = document.getElementById('otherUnit');
+      if (value === 'OTHER') {
+        otherUnitInput.classList.remove('hidden');
+      } else {
+        otherUnitInput.classList.add('hidden');
+        otherUnitInput.value = '';
+      }
+    }
+
+    function submitForm(event) {
+      event.preventDefault();
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const staffID = document.getElementById("staffID").value.trim();
+      let unit = document.getElementById("unit").value.trim();
+      const otherUnit = document.getElementById("otherUnit").value.trim();
+      const shift = document.getElementById("shift").value.trim();
+      const signType = document.getElementById("signType").value.trim();
+      const latitude = document.getElementById("latitude").value.trim();
+      const longitude = document.getElementById("longitude").value.trim();
+      const errorMessage = document.getElementById("errorMessage");
+
+      if (unit === 'OTHER') {
+        if (!otherUnit) {
+          errorMessage.textContent = "Please specify the other unit.";
+          return;
+        }
+        unit = otherUnit;
+      }
+
+      if (!name || !email || !staffID || !unit || !shift || !signType || !latitude || !longitude) {
+        errorMessage.textContent = "Please fill in all required fields and enable location.";
+        return;
+      }
+
+      errorMessage.textContent = "";
+
+      // Save or process form data here
+      console.log("Staff Form Data:", {
+        Name: name,
+        eMail: email,
+        "Staff ID": staffID,
+        Unit: unit,
+        Shift: shift,
+        "Sign Type": signType,
+        Latitude: latitude,
+        Longitude: longitude,
+        Timestamp: new Date().toISOString()
+      });
+
+      alert("Your staff data has been saved locally.\nYou will now be redirected to the Microsoft Form.");
+
+      // Open Microsoft Form in a new tab/window for the user to fill
+      window.open(microsoftFormURL, "_blank");
+    }
+
+    function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            document.getElementById("latitude").value = position.coords.latitude;
+            document.getElementById("longitude").value = position.coords.longitude;
+          },
+          (error) => {
+            document.getElementById("errorMessage").textContent = "Location access denied. Please enable location services.";
+          }
+        );
+      } else {
+        document.getElementById("errorMessage").textContent = "Geolocation is not supported by this browser.";
+      }
+    }
+
+    window.onload = getLocation;
+  </script>
+</body>
+</html>
